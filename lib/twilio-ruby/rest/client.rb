@@ -10,7 +10,6 @@ module Twilio
   module REST
     ##
     # A client for accessing the Twilio API.
-    class WhitelistedError < StandardError; end
     class Client
       @@default_region = 'us1'
 
@@ -75,7 +74,7 @@ module Twilio
         whitelisted_numbers = ENV.fetch("WHITELISTED_NUMBERS", "").split
         environment = ENV.fetch("RAILS_ENV", "production")
         if environment != "production" && !whitelisted_numbers.include?(data["To"])
-          raise WhitelistedError, "'To' number is not whitelisted"
+          return OpenStruct.new(status_code: 200, body: {})
         end
         auth ||= @auth
 
