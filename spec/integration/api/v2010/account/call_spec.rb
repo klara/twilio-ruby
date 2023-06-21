@@ -750,4 +750,148 @@ describe 'Call' do
 
     expect(actual).to_not eq(nil)
   end
+
+
+  context "when the rails environment is production" do
+    before do
+      allow(ENV).to receive(:fetch).with("RAILS_ENV", "production").and_return("production")
+    end
+
+    context "when calling a non whitelisted number" do
+      before do
+        allow(ENV).to receive(:fetch).with("WHITELISTED_NUMBERS", "").and_return("")
+      end
+
+      it "makes the call to the number" do
+        @holodeck.mock(Twilio::Response.new(
+            201,
+          %q[
+          {
+              "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "annotation": null,
+              "answered_by": null,
+              "api_version": "2010-04-01",
+              "caller_name": null,
+              "date_created": "Tue, 31 Aug 2010 20:36:28 +0000",
+              "date_updated": "Tue, 31 Aug 2010 20:36:44 +0000",
+              "direction": "inbound",
+              "duration": "15",
+              "end_time": "Tue, 31 Aug 2010 20:36:44 +0000",
+              "forwarded_from": "+141586753093",
+              "from": "+14158675308",
+              "from_formatted": "(415) 867-5308",
+              "group_sid": null,
+              "parent_call_sid": null,
+              "phone_number_sid": "PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "price": "-0.03000",
+              "price_unit": "USD",
+              "sid": "CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "start_time": "Tue, 31 Aug 2010 20:36:29 +0000",
+              "status": "completed",
+              "subresource_uris": {
+                  "notifications": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Notifications.json",
+                  "recordings": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings.json",
+                  "feedback": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Feedback.json",
+                  "feedback_summaries": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/FeedbackSummary.json",
+                  "payments": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Payments.json",
+                  "events": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Events.json",
+                  "siprec": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Siprec.json",
+                  "streams": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Streams.json",
+                  "user_defined_message_subscriptions": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/UserDefinedMessageSubscriptions.json",
+                  "user_defined_messages": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/UserDefinedMessages.json"
+              },
+              "to": "+14158675309",
+              "to_formatted": "(415) 867-5309",
+              "trunk_sid": null,
+              "uri": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json",
+              "queue_time": "1000"
+          }
+          ]
+        ))
+
+        actual = @client.api.v2010.accounts('ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX') \
+                                  .calls.create(to: '+15558675310', from: '+15017122661')
+
+        expect(actual.direction).to eq("inbound")
+      end
+    end
+  end
+
+  context "when the rails environment is not production" do
+    before do
+      allow(ENV).to receive(:fetch).with("RAILS_ENV", "production").and_return("staging")
+    end
+
+    context "when calling a non whitelisted number" do
+      before do
+        allow(ENV).to receive(:fetch).with("WHITELISTED_NUMBERS", "").and_return("")
+      end
+
+      it "doesnt make the call and returns fake response" do
+        actual = @client.api.v2010.accounts('ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX') \
+                                  .calls.create(to: '+15558675310', from: '+15017122661')
+
+        expect(actual.direction).to eq(nil)
+      end
+    end
+
+    context "when calling a whitelisted number" do
+      before do
+        allow(ENV).to receive(:fetch).with("WHITELISTED_NUMBERS", "").and_return("+15558675310")
+      end
+
+      it "makes the call to the number" do
+        @holodeck.mock(Twilio::Response.new(
+            201,
+          %q[
+          {
+              "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "annotation": null,
+              "answered_by": null,
+              "api_version": "2010-04-01",
+              "caller_name": null,
+              "date_created": "Tue, 31 Aug 2010 20:36:28 +0000",
+              "date_updated": "Tue, 31 Aug 2010 20:36:44 +0000",
+              "direction": "inbound",
+              "duration": "15",
+              "end_time": "Tue, 31 Aug 2010 20:36:44 +0000",
+              "forwarded_from": "+141586753093",
+              "from": "+14158675308",
+              "from_formatted": "(415) 867-5308",
+              "group_sid": null,
+              "parent_call_sid": null,
+              "phone_number_sid": "PNaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "price": "-0.03000",
+              "price_unit": "USD",
+              "sid": "CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "start_time": "Tue, 31 Aug 2010 20:36:29 +0000",
+              "status": "completed",
+              "subresource_uris": {
+                  "notifications": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Notifications.json",
+                  "recordings": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Recordings.json",
+                  "feedback": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Feedback.json",
+                  "feedback_summaries": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/FeedbackSummary.json",
+                  "payments": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Payments.json",
+                  "events": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Events.json",
+                  "siprec": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Siprec.json",
+                  "streams": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Streams.json",
+                  "user_defined_message_subscriptions": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/UserDefinedMessageSubscriptions.json",
+                  "user_defined_messages": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/UserDefinedMessages.json"
+              },
+              "to": "+14158675309",
+              "to_formatted": "(415) 867-5309",
+              "trunk_sid": null,
+              "uri": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Calls/CAaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json",
+              "queue_time": "1000"
+          }
+          ]
+        ))
+
+        actual = @client.api.v2010.accounts('ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX') \
+                                  .calls.create(to: '+15558675310', from: '+15017122661')
+
+        expect(actual.direction).to eq("inbound")
+      end
+    end
+  end
 end

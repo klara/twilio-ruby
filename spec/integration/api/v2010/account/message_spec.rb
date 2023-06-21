@@ -713,4 +713,123 @@ describe 'Message' do
 
     expect(actual).to_not eq(nil)
   end
+
+  context "when the rails environment is production" do
+    before do
+      allow(ENV).to receive(:fetch).with("RAILS_ENV", "production").and_return("production")
+    end
+
+    context "when the number is not whitelisted" do
+      before do
+        allow(ENV).to receive(:fetch).with("WHITELISTED_NUMBERS", "").and_return("")
+      end
+
+      it "sends the message" do
+        @holodeck.mock(Twilio::Response.new(
+            201,
+          %q[
+          {
+              "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "api_version": "2010-04-01",
+              "body": "Hello! \ud83d\udc4d",
+              "date_created": "Thu, 30 Jul 2015 20:12:31 +0000",
+              "date_sent": "Thu, 30 Jul 2015 20:12:33 +0000",
+              "date_updated": "Thu, 30 Jul 2015 20:12:33 +0000",
+              "direction": "outbound-api",
+              "error_code": null,
+              "error_message": null,
+              "from": "+14155552345",
+              "messaging_service_sid": "MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "num_media": "0",
+              "num_segments": "1",
+              "price": null,
+              "price_unit": null,
+              "sid": "SMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "status": "sent",
+              "subresource_uris": {
+                  "media": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages/SMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media.json"
+              },
+              "tags": {
+                  "campaign_name": "Spring Sale 2022",
+                  "message_type": "cart_abandoned"
+              },
+              "to": "+14155552345",
+              "uri": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages/SMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json"
+          }
+          ]
+        ))
+
+        actual = @client.api.v2010.accounts('ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX') \
+                                  .messages.create(to: '+15558675310')
+
+        expect(actual.body).to eq('Hello! 👍')
+      end
+    end
+  end
+
+  context "when the rails environment is not production" do
+    before do
+      allow(ENV).to receive(:fetch).with("RAILS_ENV", "production").and_return("staging")
+    end
+
+    context "when sending a message to non whitelisted number" do
+      before do
+        allow(ENV).to receive(:fetch).with("WHITELISTED_NUMBERS", "").and_return("")
+      end
+
+      it "returns a fake response" do
+        actual = @client.api.v2010.accounts('ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX') \
+                                  .messages.create(to: '+15558675310')
+
+        expect(actual.body).to eq(nil)
+      end
+    end
+
+    context "when sending a message to a whitelisted number" do
+      before do
+        allow(ENV).to receive(:fetch).with("WHITELISTED_NUMBERS", "").and_return('+15558675310')
+      end
+
+      it "sends the message" do
+        @holodeck.mock(Twilio::Response.new(
+            201,
+          %q[
+          {
+              "account_sid": "ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "api_version": "2010-04-01",
+              "body": "Hello! \ud83d\udc4d",
+              "date_created": "Thu, 30 Jul 2015 20:12:31 +0000",
+              "date_sent": "Thu, 30 Jul 2015 20:12:33 +0000",
+              "date_updated": "Thu, 30 Jul 2015 20:12:33 +0000",
+              "direction": "outbound-api",
+              "error_code": null,
+              "error_message": null,
+              "from": "+14155552345",
+              "messaging_service_sid": "MGaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "num_media": "0",
+              "num_segments": "1",
+              "price": null,
+              "price_unit": null,
+              "sid": "SMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa",
+              "status": "sent",
+              "subresource_uris": {
+                  "media": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages/SMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Media.json"
+              },
+              "tags": {
+                  "campaign_name": "Spring Sale 2022",
+                  "message_type": "cart_abandoned"
+              },
+              "to": "+14155552345",
+              "uri": "/2010-04-01/Accounts/ACaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa/Messages/SMaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa.json"
+          }
+          ]
+        ))
+
+        actual = @client.api.v2010.accounts('ACXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX') \
+                                  .messages.create(to: '+15558675310')
+
+        expect(actual.body).to eq('Hello! 👍')
+      end
+    end
+  end
 end
