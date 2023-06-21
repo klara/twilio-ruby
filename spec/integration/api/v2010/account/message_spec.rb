@@ -769,12 +769,13 @@ describe 'Message' do
 
   context "when the rails environment is not production" do
     before do
-      allow(ENV).to receive(:fetch).with("RAILS_ENV", "production").and_return("staging")
+      allow(Twilio).to receive(:whitelisted_environments).and_return(["staging"])
+      allow(Twilio).to receive(:environment).and_return("staging")
     end
 
     context "when sending a message to non whitelisted number" do
       before do
-        allow(ENV).to receive(:fetch).with("WHITELISTED_NUMBERS", "").and_return("")
+        allow(Twilio).to receive(:whitelisted_numbers).and_return(nil)
       end
 
       it "returns a fake response" do
@@ -787,7 +788,7 @@ describe 'Message' do
 
     context "when sending a message to a whitelisted number" do
       before do
-        allow(ENV).to receive(:fetch).with("WHITELISTED_NUMBERS", "").and_return('+15558675310')
+        allow(Twilio).to receive(:whitelisted_numbers).and_return(['+15558675310'])
       end
 
       it "sends the message" do

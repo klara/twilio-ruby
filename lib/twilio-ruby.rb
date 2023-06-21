@@ -28,7 +28,8 @@ module Twilio
   autoload :HTTP, File.join(__dir__, 'twilio-ruby', 'http.rb')
   autoload :REST, File.join(__dir__, 'twilio-ruby', 'rest.rb')
 
-  def_delegators :configuration, :account_sid, :auth_token, :http_client, :region, :edge, :logger
+  def_delegators :configuration, :account_sid, :auth_token, :http_client, :region, :edge, :logger,
+                 :whitelisted_numbers, :whitelisted_environments, :environment
 
   ##
   # Pre-configure with account SID and auth token so that you don't need to

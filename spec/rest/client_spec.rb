@@ -274,4 +274,36 @@ describe Twilio::REST::Client do
       expect(actual_extensions).to match_array(extensions)
     end
   end
+
+  context 'when client makes request to a uri requiring whitelisting' do
+    before do
+      @client.http_client = Twilio::HTTP::Client.new
+      @connection = Faraday::Connection.new
+      expect(Faraday).to receive(:new).and_yield(@connection).and_return(@connection)
+    end
+
+    context 'when the environment is not production' do
+      context 'when the number is whitelisted' do
+        it 'performs the request as normal' do
+        end
+      end
+
+      context 'when the number is not whitelisted' do
+        it 'does not perform the request and instead returns a 200 response' do
+        end
+      end
+    end
+
+    context 'when the environment is production' do
+      it 'performs the request as expected' do
+      end
+    end
+  end
+
+  context 'when the client makes a request to a uri that does not require whitelisting' do
+    it 'performs the request as normal' do
+      expect_any_instance_of(Faraday::Connection).to receive(:send).and_return(double('response', status: 301, body: {}, headers: {}))
+      @client.request('host', 'port', 'GET', 'https://api.twilio.com/2010-04-01/Accounts/1234/AvailablePhoneNumbers/US/Local.json')
+    end
+  end
 end

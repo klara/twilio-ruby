@@ -754,12 +754,13 @@ describe 'Call' do
 
   context "when the rails environment is production" do
     before do
-      allow(ENV).to receive(:fetch).with("RAILS_ENV", "production").and_return("production")
+      allow(Twilio).to receive(:whitelisted_environments).and_return(["staging"])
+      allow(Twilio).to receive(:environment).and_return("production")
     end
 
     context "when calling a non whitelisted number" do
       before do
-        allow(ENV).to receive(:fetch).with("WHITELISTED_NUMBERS", "").and_return("")
+        allow(Twilio).to receive(:whitelisted_numbers).and_return(nil)
       end
 
       it "makes the call to the number" do
@@ -819,12 +820,13 @@ describe 'Call' do
 
   context "when the rails environment is not production" do
     before do
-      allow(ENV).to receive(:fetch).with("RAILS_ENV", "production").and_return("staging")
+      allow(Twilio).to receive(:whitelisted_environments).and_return(["staging"])
+      allow(Twilio).to receive(:environment).and_return("staging")
     end
 
     context "when calling a non whitelisted number" do
       before do
-        allow(ENV).to receive(:fetch).with("WHITELISTED_NUMBERS", "").and_return("")
+        allow(Twilio).to receive(:whitelisted_numbers).and_return(nil)
       end
 
       it "doesnt make the call and returns fake response" do
@@ -837,7 +839,7 @@ describe 'Call' do
 
     context "when calling a whitelisted number" do
       before do
-        allow(ENV).to receive(:fetch).with("WHITELISTED_NUMBERS", "").and_return("+15558675310")
+        allow(Twilio).to receive(:whitelisted_numbers).and_return(['+15558675310'])
       end
 
       it "makes the call to the number" do
